@@ -1,98 +1,131 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useCalories } from '@/context/CalorieContext';
+import { useRouter } from 'expo-router';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const router = useRouter();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const { totalCalories } = useCalories();
+  const caloriesLogged = totalCalories;
+  const calorieGoal = 2000;
+  const progressPercent = Math.min(caloriesLogged / calorieGoal, 1);
+
+  const getPandaMood = () => {
+    if (progressPercent < 0.8) return { emoji: '🐼', mood: 'Happy!', color: '#4CAF50' };
+    if (progressPercent < 1.0) return { emoji: '😐', mood: 'Getting full...', color: '#FF9800' };
+    return { emoji: '😢', mood: 'I am full! Stop feeding me!', color: '#F44336' };
+  };
+
+  const panda = getPandaMood();
+
+  return (
+    <View style={styles.container}>
+
+      {/* Panda */}
+      <View style={styles.pandaContainer}>
+        <Text style={styles.pandaEmoji}>{panda.emoji}</Text>
+        <Text style={[styles.pandaMood, { color: panda.color }]}>{panda.mood}</Text>
+      </View>
+
+      {/* Calorie display */}
+      <View style={styles.calorieCard}>
+        <Text style={styles.calorieNumber}>{caloriesLogged}</Text>
+        <Text style={styles.calorieLabel}>/ {calorieGoal} kcal</Text>
+
+        {/* Progress bar */}
+        <View style={styles.progressBarBackground}>
+          <View style={[styles.progressBarFill, {
+            width: `${progressPercent * 100}%`,
+            backgroundColor: panda.color
+          }]} />
+        </View>
+      </View>
+
+      {/* Log meal button */}
+      <TouchableOpacity
+        style={styles.logButton}
+        onPress={() => router.push('/log-meal')}
+      >
+        <Text style={styles.logButtonText}>+ Log a Meal</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.resetButton}> {/* add // TODO: add onPress for reset function */}
+  <Text style={styles.resetButtonText}>Reset</Text>
+</TouchableOpacity>
+
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    padding: 24,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  pandaContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  pandaEmoji: {
+    fontSize: 100,
+  },
+  pandaMood: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  calorieCard: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 32,
+  },
+  calorieNumber: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: '#222',
+  },
+  calorieLabel: {
+    fontSize: 16,
+    color: '#888',
+    marginBottom: 16,
+  },
+  progressBarBackground: {
+    width: '100%',
+    height: 12,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 6,
+  },
+  logButton: {
+    backgroundColor: '#FF6B35',
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    borderRadius: 12,
+  },
+  logButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  resetButton: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+  },
+  resetButtonText: {
+    color: '#888',
+    fontSize: 15,
   },
 });

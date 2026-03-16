@@ -1,12 +1,21 @@
+import { useCalories } from '@/context/CalorieContext';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function LogMealScreen() {
   const router = useRouter();
 
-  // TODO: add useState for mealName and calories
-  // TODO: pull addMeal from useCalories()
-  // TODO: write handleSave function
+  const [mealName, setMealName] = useState('')
+  const [calories, setCalories] = useState('')
+
+  const { addMeal } = useCalories();
+  
+  const handleSave = () => {
+    if (!mealName || !calories) return;
+    addMeal({name: mealName, calories: Number(calories)})
+    router.back();
+  }
 
   return (
     <View style={styles.container}>
@@ -18,7 +27,8 @@ export default function LogMealScreen() {
         <TextInput
           style={styles.input}
           placeholder="e.g. Hattie B's"
-          // TODO: add value and onChangeText
+          value={mealName}
+          onChangeText={setMealName}
         />
       </View>
 
@@ -28,13 +38,15 @@ export default function LogMealScreen() {
           style={styles.input}
           placeholder="e.g. 450"
           keyboardType="numeric"
-          // TODO: add value and onChangeText
+          value={calories}
+          onChangeText={setCalories}
         />
       </View>
 
       <TouchableOpacity
         style={styles.saveButton}
-        // TODO: add onPress={handleSave}
+        onPress={handleSave}
+        disabled={!mealName || !calories}
       >
         <Text style={styles.saveButtonText}>Save Meal</Text>
       </TouchableOpacity>

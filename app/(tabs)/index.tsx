@@ -5,7 +5,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function HomeScreen() {
   const router = useRouter();
 
-  const { totalCalories } = useCalories();
+  const { totalCalories, resetMeals } = useCalories();
   const caloriesLogged = totalCalories;
   const calorieGoal = 2000;
   const progressPercent = Math.min(caloriesLogged / calorieGoal, 1);
@@ -48,7 +48,7 @@ export default function HomeScreen() {
       >
         <Text style={styles.logButtonText}>+ Log a Meal</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.resetButton}> {/* add // TODO: add onPress for reset function */}
+      <TouchableOpacity style={styles.resetButton} onPress={resetMeals} >
   <Text style={styles.resetButtonText}>Reset</Text>
 </TouchableOpacity>
 
